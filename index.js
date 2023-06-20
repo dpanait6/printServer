@@ -146,7 +146,6 @@ const open_url_new_window = (mainWindow, url, print_tik, print_docs) => {
 				pdf_options.height = heightpdf;
 
 			}
-			
 
 			let file = { url: url };// url_to_print
 			html_to_pdf.generatePdf(file, pdf_options).then(pdfBuffer => {
@@ -177,9 +176,7 @@ const open_url_new_window = (mainWindow, url, print_tik, print_docs) => {
 		}
 	});
 
-
 }
-
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
