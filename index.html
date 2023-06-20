@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Servidor Impresion</title>
+  <style>
+    :root {
+      --blue: #007bff;
+      --indigo: #6610f2;
+      --purple: #6f42c1;
+      --pink: #e83e8c;
+      --red: #dc3545;
+      --orange: #fd7e14;
+      --yellow: #ffc107;
+      --green: #28a745;
+      --teal: #20c997;
+      --cyan: #17a2b8;
+      --white: #fff;
+      --gray: #6c757d;
+      --gray-dark: #343a40;
+      --primary: #007bff;
+      --secondary: #6c757d;
+      --success: #28a745;
+      --info: #17a2b8;
+      --warning: #ffc107;
+      --danger: #dc3545;
+      --light: #f8f9fa;
+      --dark: #343a40;
+      --breakpoint-xs: 0;
+      --breakpoint-sm: 576px;
+      --breakpoint-md: 768px;
+      --breakpoint-lg: 992px;
+      --breakpoint-xl: 1200px;
+      --font-family-sans-serif: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+      --font-family-monospace: SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+    }
+    @media (min-width: 768px){
+      .container {
+        max-width: 720px;
+      }
+    }
+    @media (min-width: 576px){
+      .container {
+        max-width: 540px;
+      }
+      .container {
+        width: 100%;
+        padding-right: 15px;
+        padding-left: 15px;
+        margin-right: auto;
+        margin-left: auto;
+      }
+    }
+    select {
+      word-wrap: normal;
+    }
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    .form-control {
+      display: block;
+      width: 100%;
+      height: calc(1.5em + .75rem + 2px);
+      padding: .375rem .75rem;
+      font-size: 1rem;
+      font-weight: 400;
+      line-height: 1.5;
+      color: #495057;
+      background-color: #fff;
+      background-clip: padding-box;
+      border: 1px solid #ced4da;
+      border-radius: .25rem;
+      transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    }
+    
+    .btn {
+      display: inline-block;
+      font-weight: 400;
+      color: #212529;
+      text-align: center;
+      vertical-align: middle;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      background-color: transparent;
+      border: 1px solid transparent;
+      padding: .375rem .75rem;
+      font-size: 1rem;
+      line-height: 1.5;
+      border-radius: .25rem;
+      transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    }
+    .btn-primary {
+      color: #fff;
+      background-color: #007bff;
+      border-color: #007bff;
+    }
+    [type=submit], button {
+      -webkit-appearance: button;
+    }
+    [type=button]:not(:disabled), [type=reset]:not(:disabled), [type=submit]:not(:disabled), button:not(:disabled) {
+      cursor: pointer;
+    }
+    .btn-primary:not(:disabled):not(.disabled):active, .show>.btn-primary.dropdown-toggle {
+      color: #fff;
+      background-color: #0062cc;
+      border-color: #005cbf;
+    }
+    .btn-primary:hover {
+      color: #fff;
+      background-color: #0069d9;
+      border-color: #0062cc;
+    }
+    .message{
+      text-align: center;
+    }
+    .text-danger{
+      color: red;
+    }
+</style>
+</head>
+<body>
+  <div class="container" style="width: 80%;margin: 0 auto;">
+    <center><h5 style="font-size: 18px;">Seleccionar la impresora para los Tickets</h5></center>
+    <div class="message">
+        <p>Porfavor seleciona su impresora para los tickets y luego haz clic en <br> "Guadar Impresora"</p>
+    </div>
+    <div class="form-group" id="ticket-printers-container"  style="width: 350px;margin: 0 auto;margin-bottom: 20px;"></div>
+    <div class="" style="margin-top: 20px; margin: 0 auto;width: 189px;">
+        <input type="submit" class="btn btn-primary" onclick="set_printer('ticket');" value="Guardar Impresora">
+    </div>
+
+    <center><h5 style="font-size: 18px;">Seleccionar la impresora para los documentos</h5></center>
+    <div class="message">
+        <p>Porfavor seleciona su impresora para los documentos y luego haz clic en <br> "Guadar Impresora"</p>
+    </div>
+    <div class="form-group" id="docs-printers-container"  style="width: 350px;margin: 0 auto;margin-bottom: 20px;"></div>
+    <div class="" style="margin-top: 20px; margin: 0 auto;width: 189px;">
+        <input type="submit" class="btn btn-primary" onclick="set_printer('docs');" value="Guardar Impresora">
+    </div>
+
+</div>
+</body>
+<script>
+  const electron = require('electron');
+  const ipcRenderer = electron.ipcRenderer;
+  const Store = require("electron-store");
+  const store = new Store();
+  const fs = require("fs");
+  const path = require('path');
+  //console.log("process.mainModule", process.env.INIT_CWD, __dirname)
+
+  let install_path = __dirname;//process.env.INIT_CWD;
+  let ticket_printers_containers = document.querySelector("#ticket-printers-container");
+  let docs_printers_containers = document.querySelector("#docs-printers-container");
+  let ticket_printer_select = '';
+  let docs_printer_select = '';
+  console.log("dirname", __dirname, install_path);
+  if(store.get("ticket_printer")) {//tikets printer name selected
+    ticket_printer_select =  store.get("ticket_printer");
+  }
+  if(store.get("docs_printer")) {//documents printer name selected
+    docs_printer_select =  store.get("docs_printer");
+  }
+
+
+  ipcRenderer.on("printers:sys",async (error, data) => {
+    console.log(data); 
+    let select_tickets = '<select class="form-control" name="" id="ticket-printers"><option value="0">Ninguna</option>'
+    data.forEach(element => {
+        if(ticket_printer_select != "" && ticket_printer_select == element.name) select_tickets +=`<option value="${element.name}" selected>${element.name}</option>`
+        else select_tickets +=`<option value="${element.name}">${element.name}</option>`
+    });
+    select_tickets += "</select>"
+    ticket_printers_containers.innerHTML = select_tickets;
+
+    //selector para los documentos
+    let select_docs = '<select class="form-control" name="" id="docs-printers"><option value="0">Ninguna</option>'
+    data.forEach(element => {
+        if(docs_printer_select != "" && docs_printer_select == element.name) select_docs +=`<option value="${element.name}" selected>${element.name}</option>`
+        else select_docs +=`<option value="${element.name}">${element.name}</option>`
+    });
+    select_docs += "</select>"
+    docs_printers_containers.innerHTML = select_docs;
+
+  });
+  ipcRenderer.on("message",async (error, d) => {
+    let data = JSON.parse(d);
+    let p = document.createElement('p');
+    p.style.color = "red";
+    p.innerText = data.msg;
+
+    if(data.type == "tickets"){
+      
+      ticket_printers_containers.appendChild(p);
+    }
+    if(data.type == "docs"){
+      docs_printers_containers.appendChild(p);
+    }
+  });
+  var set_printer = function(type){
+    let printer = document.querySelector(`#${type}-printers`).value;
+    console.log("printer",printer);
+    /*if(printer != 0){
+        store.set(`${type}_printer`,printer);
+        //console.log(process.env.APPDATA) 
+        fs.writeFileSync(`${process.env.PWD}${path.sep}${type}_printer.txt`,printer);
+    } else {*/
+      store.set(`${type}_printer`,printer);
+      //fs.writeFileSync(`${install_path}${path.sep}${type}_printer.txt`,printer);
+    //}
+  }
+  
+</script>
+</html>
