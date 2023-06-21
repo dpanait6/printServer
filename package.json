@@ -1,5 +1,5 @@
 {
-  "name": "printserver",
+  "name": "buy-print-server",
   "version": "1.0.0",
   "description": "Servidor de impresion",
   "main": "index.js",

@@ -31,8 +31,8 @@ if(process.platform == "linux"){
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 750,
+    height: 950,
 		icon : "logo.ico",
     webPreferences: {
       //preload: path.join(__dirname, 'preload.js'),
@@ -43,8 +43,9 @@ const createWindow = () => {
 
   // and load the index.html of the app.
   //mainWindow.loadFile('index.html');
-	let print_tik = false
-  let print_docs = false
+	let print_tik = false;
+  let print_docs = false;
+	let print_transport = false;
 
   let uri = process.argv[1]
 	if(uri != undefined && uri != '.'){
@@ -53,6 +54,9 @@ const createWindow = () => {
 		if(url_o.indexOf('ticket') !== -1){
 			url_to_open = url_o;
 			print_tik = true;
+		} else if(url_o.indexOf('transport') !== -1){
+			url_to_open = url_o;
+			print_transport = true;
 		} else {
 			url_to_open = url_o;
 			print_docs = true;
@@ -64,11 +68,11 @@ const createWindow = () => {
 
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
-	open_url_new_window(mainWindow, url_to_open, print_tik, print_docs);
+	open_url_new_window(mainWindow, url_to_open, print_tik, print_docs, print_transport);
 }
 
 // abrimos las url y configuramos la impresion
-const open_url_new_window = (mainWindow, url, print_tik, print_docs) => {
+const open_url_new_window = (mainWindow, url, print_tik, print_docs, print_transport) => {
 	// TMK5Z  TM4T2 TM6T3
 	//url = "https://yuubbb.com/pre/dani/iluminashop/impresion/ticket_TM4T2?tok=94c48b5d5f59cf93c3c7add6a1b64d30";
 	//url = "https://yuubbb.com/pre/dani/iluminashop/impresion/ticket_TM4T2?tok=94c48b5d5f59cf93c3c7add6a1b64d30"
@@ -81,17 +85,18 @@ const open_url_new_window = (mainWindow, url, print_tik, print_docs) => {
 	let path_pdf = `${install_path}${path.sep}doc.pdf`;
 	let url_to_print = "";
 	let printer_exe = `${__dirname}${path.sep}SumatraPDF.exe`;
+	let num_copy = 1;
 
 	let pdf_options = {
-		width:280.92,/*height:2800,*/
-		preferCSSPageSize: false,
+		width:300.01,/*height:2800,*/
+		//preferCSSPageSize: true,
 		//format: 'Custom280x1200'
-		//scale: 1.4,
+		scale: 0.95,
 		margen:{
 			top: 2,
-			right: 0,
+			right: '5mm',
 			bottom: 2,
-			left: 2
+			left: 34
 		}
 	};
 	//print_docs = true;
@@ -99,6 +104,21 @@ const open_url_new_window = (mainWindow, url, print_tik, print_docs) => {
 	// si es un ticket
 	if(print_tik){
 		//url = "https://yuubbb.com/pre/dani/iluminashop/impresion/ticket_TMK5Z?tok=94c48b5d5f59cf93c3c7add6a1b64d30";
+		let top = store.get("tickets_top") != undefined || store.get('tickets_top') != 0 ? store.get('tickets_top') : 2;
+		let left = store.get("tickets_left") != undefined || store.get('tickets_left') != 0 ? store.get('tickets_left') : 2;
+		let right = store.get("tickets_right") != undefined || store.get('tickets_right') != 0 ? store.get('tickets_right') : 2;
+		let bottom = store.get("tickets_bottom") != undefined || store.get('tickets_bottom') != 0 ? store.get('tickets_bottom') : 2;
+		num_copy = store.get("tickets_copy") != undefined || store.get('tickets_copy') != 0 ? store.get('tickets_copy') : 1;
+		let margen = {
+			top: parseInt(top),			
+			right: parseInt(right),			
+			bottom:parseInt(bottom),
+			left: parseInt(left)
+		}
+		devToolsLogJSON(mainWindow, margen);
+		//pdf_options.format = "Custom80mmx190mm";
+		pdf_options.preferCSSPageSize = true;
+		pdf_options.margen = margen;//ponemos los margenes de la impresion
 		
 		printer_name = store.get('ticket_printer');
 		if(printer_name == undefined || printer_name == 0){
@@ -111,11 +131,23 @@ const open_url_new_window = (mainWindow, url, print_tik, print_docs) => {
 	// si es un documento
 	if(print_docs){
 		pdf_options = {
-			//width:700/*,height:700.00*/,
+			//width:700*,height:700.00*/,
 			preferCSSPageSize: false,
 			scale: 0.96
 		};
-		url_to_print = "https://yuubbb.com/pre/dani/iluminashop/impresion/factura1_T1T2Z";
+		//url_to_print = "https://yuubbb.com/pre/dani/iluminashop/impresion/factura1_T1T2Z";
+		let top = store.get("docs_top") != undefined || store.get('docs_top') != 0 ? store.get('docs_top') : 2;
+		let left = store.get("docs_left") != undefined || store.get('docs_left') != 0 ? store.get('docs_left') : 2;
+		let right = store.get("docs_right") != undefined || store.get('docs_right') != 0 ? store.get('docs_right') : 2;
+		let bottom = store.get("docs_bottom") != undefined || store.get('docs_bottom') != 0 ? store.get('docs_bottom') : 2;
+		num_copy = store.get("docs_copy") != undefined || store.get('docs_copy') != 0 ? store.get('docs_copy') : 1;
+		let margen = {
+			top: top+'px',
+			left: left+'px',
+			right: right+'px',
+			bottom: bottom+'px'
+		}
+		pdf_options.margen = margen;//ponemos los margenes de la impresion
 		printer_name = store.get('docs_printer');
 		if(printer_name == undefined || printer_name == 0){
         
@@ -124,9 +156,36 @@ const open_url_new_window = (mainWindow, url, print_tik, print_docs) => {
 			return;
 		}
 	}
+	if(print_transport){
+		pdf_options = {
+			width:700/*,height:700.00*/,
+			preferCSSPageSize: false,
+			scale: 0.96
+		};
+		let top = store.get("transport_top") != undefined || store.get('transport_top') != 0 ? store.get('transport_top') : 2;
+		let left = store.get("transport_left") != undefined || store.get('transport_left') != 0 ? store.get('transport_left') : 2;
+		let right = store.get("transport_right") != undefined || store.get('transport_right') != 0 ? store.get('transport_right') : 2;
+		let bottom = store.get("transport_bottom") != undefined || store.get('transport_bottom') != 0 ? store.get('transport_bottom') : 2;
+		num_copy = store.get("transport_copy") != undefined || store.get('transport_copy') != 0 ? store.get('transport_copy') : 1;
+		let margen = {
+			top: top,
+			left: left,
+			right: right,
+			bottom: bottom
+		}
+		pdf_options.margen = margen;//ponemos los margenes de la impresion
+
+		printer_name = store.get('transport_printer');
+		if(printer_name == undefined || printer_name == 0){
+        
+			mainWindow.webContents.executeJavaScript(`alert('No tienes configurada la impresora para las pegatinas de transporte')`);
+
+			return;
+		}
+	}
 	//devToolsLogJSON(mainWindow, "printer_name: " + printer_name)
 	//devToolsLogJSON(mainWindow, "printer_exe: " + printer_exe)
-	let command = `"${printer_exe}" -print-to "${printer_name}" ${path_pdf} -silent`;
+	let command = `"${printer_exe}" -print-to "${printer_name}" ${path_pdf}  -print-settings ${num_copy}x -silent`;
 	let height = 1200;
 	//devToolsLogJSON(mainWindow, `command: ${command}`);
 	// abrimos la url en una nueva ventana
@@ -140,7 +199,7 @@ const open_url_new_window = (mainWindow, url, print_tik, print_docs) => {
 			if(print_tik){
 				height = await mainWindow.webContents.executeJavaScript("document.getElementById('container_ticket').scrollHeight");
 				console.log("height", height)
-				heightpdf = height / (1 + 30 / 100);
+				heightpdf = height / (1 + 27 / 100);
 				
 				console.log("heightpdf", heightpdf)
 				pdf_options.height = heightpdf;

@@ -120,6 +120,23 @@
     .text-danger{
       color: red;
     }
+    .d-flex{
+      display: flex;
+    }
+    .input_tickets, .input_docs, .input_transport{
+      width: 40px;
+      text-align: center;
+    }
+   .ml-2{
+      margin-left: 10px;
+    }
+    .pb-3{
+      padding-bottom: 15px;
+    }
+    .config_container{
+      margin: 0 auto;
+      width: 285px;
+    }
 </style>
 </head>
 <body>
@@ -129,8 +146,31 @@
         <p>Porfavor seleciona su impresora para los tickets y luego haz clic en <br> "Guadar Impresora"</p>
     </div>
     <div class="form-group" id="ticket-printers-container"  style="width: 350px;margin: 0 auto;margin-bottom: 20px;"></div>
+    <div class="d-flex config_container pb-3">
+      <!--<div class="magin_container">
+        <label for="margin_top">Arriba</label>
+        <input type="text" class="input_tickets" data-txt="top" id="tickets_margin_top" placeholder="Arriba"/>
+      </div>
+      <div  class="magin_container" class="ml-2">
+        <label for="margin_left">Izquierda</label>
+        <input type="text" class="input_tickets" data-txt="left" id="tickets_margin_left" placeholder="Izquierda"/>
+      </div>
+      <div class="magin_container" class="ml-2">
+        <label for="margin_right">Derecha</label>
+        <input type="text" class="input_tickets" data-txt="right" id="tickets_margin_right" placeholder="Derecha"/>
+      </div>
+      <div class="magin_container" class="ml-2">
+        <label for="margin_bottom">Abajo</label>
+        <input type="text" class="input_tickets" data-txt="bottom" id="tickets_margin_bottom" placeholder="Abajo"/>
+      </div>-->
+      <div class="magin_container" class="ml-2">
+        <label for="num_copy">Copias</label>
+        <input type="text" class="input_tickets" data-txt="copy" id="tickets_num_copy" placeholder="Copias"/>
+      </div>
+    </div>  
+    
     <div class="" style="margin-top: 20px; margin: 0 auto;width: 189px;">
-        <input type="submit" class="btn btn-primary" onclick="set_printer('ticket');" value="Guardar Impresora">
+        <input type="submit" class="btn btn-primary" onclick="set_printer('ticket');config_ticket_printer();" value="Guardar Impresora">
     </div>
 
     <center><h5 style="font-size: 18px;">Seleccionar la impresora para los documentos</h5></center>
@@ -138,8 +178,61 @@
         <p>Porfavor seleciona su impresora para los documentos y luego haz clic en <br> "Guadar Impresora"</p>
     </div>
     <div class="form-group" id="docs-printers-container"  style="width: 350px;margin: 0 auto;margin-bottom: 20px;"></div>
+    <div class="d-flex config_container pb-3">
+      <!--<div class="magin_container">
+        <label for="margin_top">Arriba</label>
+        <input type="text" class="input_docs" data-txt="top" id="docs_margin_top" placeholder="Arriba"/>
+      </div>
+      <div class="magin_container" class="ml-2">
+        <label for="margin_left">Izquierda</label>
+        <input type="text" class="input_docs" data-txt="left" id="docs_margin_left" placeholder="Izquierda"/>
+      </div>
+      <div class="magin_container" class="ml-2">
+        <label for="margin_right">Derecha</label>
+        <input type="text" class="input_docs" data-txt="right" id="docs_margin_right" placeholder="Derecha"/>
+      </div>
+      <div class="magin_container" class="ml-2">
+        <label for="margin_bottom">Abajo</label>
+        <input type="text" class="input_docs" data-txt="bottom" id="docs_margin_bottom" placeholder="Abajo"/>
+      </div>-->
+      <div class="magin_container" class="ml-2">
+        <label for="num_copy">Copias</label>
+        <input type="text" class="input_docs" data-txt="copy" id="docs_num_copy" placeholder="Copias"/>
+      </div>
+    </div>  
     <div class="" style="margin-top: 20px; margin: 0 auto;width: 189px;">
-        <input type="submit" class="btn btn-primary" onclick="set_printer('docs');" value="Guardar Impresora">
+        <input type="submit" class="btn btn-primary" onclick="set_printer('docs');config_docs_printer();" value="Guardar Impresora">
+    </div>
+
+    <center><h5 style="font-size: 18px;">Seleccionar la impresora para pegatinas transporte</h5></center>
+    <div class="message">
+        <p>Porfavor seleciona su impresora para las pegatinas de transporte y luego haz clic en <br> "Guadar Impresora"</p>
+    </div>
+    <div class="form-group" id="transport-printers-container"  style="width: 350px;margin: 0 auto;margin-bottom: 20px;"></div>
+    <div class="d-flex config_container pb-3">
+      <!--<div class="magin_container">
+        <label for="margin_top">Arriba</label>
+        <input type="text" class="input_transport" data-txt="top" id="transport_margin_top" placeholder="Arriba"/>
+      </div>
+      <div class="magin_container" class="ml-2">
+        <label for="margin_left">Izquierda</label>
+        <input type="text" class="input_transport" data-txt="left" id="transport_margin_left" placeholder="Izquierda"/>
+      </div>
+      <div class="magin_container" class="ml-2">
+        <label for="margin_right">Derecha</label>
+        <input type="text" class="input_transport" data-txt="right" id="transport_margin_right" placeholder="Derecha"/>
+      </div>
+      <div class="magin_container" class="ml-2">
+        <label for="margin_bottom">Abajo</label>
+        <input type="text" class="input_transport" data-txt="bottom" id="transport_margin_bottom" placeholder="Abajo"/>
+      </div>-->
+      <div class="magin_container" class="ml-2">
+        <label for="num_copy">Copias</label>
+        <input type="text" class="input_transport" data-txt="copy" id="transport_num_copy" placeholder="Copias"/>
+      </div>
+    </div>  
+    <div class="" style="margin-top: 20px; margin: 0 auto;width: 189px;">
+        <input type="submit" class="btn btn-primary" onclick="set_printer('transport');config_transport_printer();" value="Guardar Impresora">
     </div>
 
 </div>
@@ -156,14 +249,67 @@
   let install_path = __dirname;//process.env.INIT_CWD;
   let ticket_printers_containers = document.querySelector("#ticket-printers-container");
   let docs_printers_containers = document.querySelector("#docs-printers-container");
+  let transport_printers_containers = document.querySelector("#transport-printers-container");
   let ticket_printer_select = '';
   let docs_printer_select = '';
+  let transport_printer_select = '';
   console.log("dirname", __dirname, install_path);
   if(store.get("ticket_printer")) {//tikets printer name selected
     ticket_printer_select =  store.get("ticket_printer");
   }
   if(store.get("docs_printer")) {//documents printer name selected
     docs_printer_select =  store.get("docs_printer");
+  }
+  if(store.get("transport_printer")) {//transporte printer name selected
+    transport_printer_select =  store.get("transport_printer");
+  }
+
+  /*if(store.get('tickets_top')){
+    document.querySelector('#tickets_margin_top').value = store.get('tickets_top');
+  }
+  if(store.get('tickets_left')){
+    document.querySelector('#tickets_margin_left').value = store.get('tickets_left');
+  }
+  if(store.get('tickets_right')){
+    document.querySelector('#tickets_margin_right').value = store.get('tickets_right');
+  }
+  if(store.get('tickets_bottom')){
+    document.querySelector('#tickets_margin_bottom').value = store.get('tickets_bottom');
+  }*/
+  if(store.get('tickets_copy')){
+    document.querySelector('#tickets_num_copy').value = store.get('tickets_copy');
+  }
+  // docs
+  /*if(store.get('docs_top')){
+    document.querySelector('#docs_margin_top').value = store.get('docs_top');
+  }
+  if(store.get('docs_left')){
+    document.querySelector('#docs_margin_left').value = store.get('docs_left');
+  }
+  if(store.get('docs_right')){
+    document.querySelector('#docs_margin_right').value = store.get('docs_right');
+  }
+  if(store.get('docs_bottom')){
+    document.querySelector('#docs_margin_bottom').value = store.get('docs_bottom');
+  }*/
+  if(store.get('docs_copy')){
+    document.querySelector('#docs_num_copy').value = store.get('docs_copy');
+  }
+  // transport
+  /*if(store.get('transport_top')){
+    document.querySelector('#transport_margin_top').value = store.get('transport_top');
+  }
+  if(store.get('transport_left')){
+    document.querySelector('#transport_margin_left').value = store.get('transport_left');
+  }
+  if(store.get('transport_right')){
+    document.querySelector('#transport_margin_right').value = store.get('transport_right');
+  }
+  if(store.get('transport_bottom')){
+    document.querySelector('#transport_margin_bottom').value = store.get('transport_bottom');
+  }*/
+  if(store.get('transport_copy')){
+    document.querySelector('#transport_num_copy').value = store.get('transport_copy');
   }
 
 
@@ -186,6 +332,15 @@
     select_docs += "</select>"
     docs_printers_containers.innerHTML = select_docs;
 
+    //selector para los documentos
+    let select_transport = '<select class="form-control" name="" id="transport-printers"><option value="0">Ninguna</option>'
+    data.forEach(element => {
+        if(transport_printer_select != "" && transport_printer_select == element.name) select_transport +=`<option value="${element.name}" selected>${element.name}</option>`
+        else select_transport +=`<option value="${element.name}">${element.name}</option>`
+    });
+    select_transport += "</select>"
+    transport_printers_containers.innerHTML = select_transport;
+
   });
   ipcRenderer.on("message",async (error, d) => {
     let data = JSON.parse(d);
@@ -200,6 +355,9 @@
     if(data.type == "docs"){
       docs_printers_containers.appendChild(p);
     }
+    if(data.type == "transport"){
+      transport_printers_containers.appendChild(p);
+    }
   });
   var set_printer = function(type){
     let printer = document.querySelector(`#${type}-printers`).value;
@@ -213,6 +371,84 @@
       //fs.writeFileSync(`${install_path}${path.sep}${type}_printer.txt`,printer);
     //}
   }
-  
+  var config_ticket_printer = function(){
+    //let value = this.value;
+    let elements = document.querySelectorAll('.input_tickets');
+    elements.forEach((item, idx)=>{
+      console.log(item, idx);
+      let value = item.value;
+      let type = item.dataset.txt;
+      console.log(value, type)
+      if(value != "" && type == 'top'){
+        store.set(`tickets_${type}`,value);
+      }
+      if(value != "" && type == 'left'){
+        store.set(`tickets_${type}`,value);
+      }
+      if(value != "" && type == 'right'){
+        store.set(`tickets_${type}`,value);
+      }
+      if(value != "" && type == 'bottom'){
+        store.set(`tickets_${type}`,value);
+      }
+      if(value != "" && type == 'copy'){
+        store.set(`tickets_${type}`,value);
+      }
+    })
+    
+  }
+  var config_docs_printer = function(){
+    //let value = this.value;
+    let elements = document.querySelectorAll('.input_docs');
+    elements.forEach((item, idx)=>{
+      console.log(item, idx);
+      let value = item.value;
+      let type = item.dataset.txt;
+      console.log(value, type)
+      if(value != "" && type == 'top'){
+        store.set(`docs_${type}`,value);
+      }
+      if(value != "" && type == 'left'){
+        store.set(`docs_${type}`,value);
+      }
+      if(value != "" && type == 'right'){
+        store.set(`docs_${type}`,value);
+      }
+      if(value != "" && type == 'bottom'){
+        store.set(`docs_${type}`,value);
+      }
+      if(value != "" && type == 'copy'){
+        store.set(`docs_${type}`,value);
+      }
+    })
+    
+  }
+
+  var config_transport_printer = function(){
+    //let value = this.value;
+    let elements = document.querySelectorAll('.input_transport');
+    elements.forEach((item, idx)=>{
+      console.log(item, idx);
+      let value = item.value;
+      let type = item.dataset.txt;
+      console.log(value, type)
+      if(value != "" && type == 'top'){
+        store.set(`transport_${type}`,value);
+      }
+      if(value != "" && type == 'left'){
+        store.set(`transport_${type}`,value);
+      }
+      if(value != "" && type == 'right'){
+        store.set(`transport_${type}`,value);
+      }
+      if(value != "" && type == 'bottom'){
+        store.set(`transport_${type}`,value);
+      }
+      if(value != "" && type == 'copy'){
+        store.set(`transport_${type}`,value);
+      }
+    })
+    
+  }
 </script>
 </html>
