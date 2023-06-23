@@ -135,7 +135,7 @@
     }
     .config_container{
       margin: 0 auto;
-      width: 285px;
+      width: 340px;
     }
 </style>
 </head>
@@ -147,7 +147,11 @@
     </div>
     <div class="form-group" id="ticket-printers-container"  style="width: 350px;margin: 0 auto;margin-bottom: 20px;"></div>
     <div class="d-flex config_container pb-3">
-      <!--<div class="magin_container">
+      <div class="magin_container">
+        <label for="width">Ancho</label>
+        <input type="text" class="input_tickets" data-txt="width" id="tickets_width" placeholder="Ancho"/>
+      </div>
+      <div class="magin_container">
         <label for="margin_top">Arriba</label>
         <input type="text" class="input_tickets" data-txt="top" id="tickets_margin_top" placeholder="Arriba"/>
       </div>
@@ -162,7 +166,7 @@
       <div class="magin_container" class="ml-2">
         <label for="margin_bottom">Abajo</label>
         <input type="text" class="input_tickets" data-txt="bottom" id="tickets_margin_bottom" placeholder="Abajo"/>
-      </div>-->
+      </div>
       <div class="magin_container" class="ml-2">
         <label for="num_copy">Copias</label>
         <input type="text" class="input_tickets" data-txt="copy" id="tickets_num_copy" placeholder="Copias"/>
@@ -179,7 +183,7 @@
     </div>
     <div class="form-group" id="docs-printers-container"  style="width: 350px;margin: 0 auto;margin-bottom: 20px;"></div>
     <div class="d-flex config_container pb-3">
-      <!--<div class="magin_container">
+      <div class="magin_container">
         <label for="margin_top">Arriba</label>
         <input type="text" class="input_docs" data-txt="top" id="docs_margin_top" placeholder="Arriba"/>
       </div>
@@ -194,7 +198,7 @@
       <div class="magin_container" class="ml-2">
         <label for="margin_bottom">Abajo</label>
         <input type="text" class="input_docs" data-txt="bottom" id="docs_margin_bottom" placeholder="Abajo"/>
-      </div>-->
+      </div>
       <div class="magin_container" class="ml-2">
         <label for="num_copy">Copias</label>
         <input type="text" class="input_docs" data-txt="copy" id="docs_num_copy" placeholder="Copias"/>
@@ -210,7 +214,7 @@
     </div>
     <div class="form-group" id="transport-printers-container"  style="width: 350px;margin: 0 auto;margin-bottom: 20px;"></div>
     <div class="d-flex config_container pb-3">
-      <!--<div class="magin_container">
+      <div class="magin_container">
         <label for="margin_top">Arriba</label>
         <input type="text" class="input_transport" data-txt="top" id="transport_margin_top" placeholder="Arriba"/>
       </div>
@@ -225,7 +229,7 @@
       <div class="magin_container" class="ml-2">
         <label for="margin_bottom">Abajo</label>
         <input type="text" class="input_transport" data-txt="bottom" id="transport_margin_bottom" placeholder="Abajo"/>
-      </div>-->
+      </div>
       <div class="magin_container" class="ml-2">
         <label for="num_copy">Copias</label>
         <input type="text" class="input_transport" data-txt="copy" id="transport_num_copy" placeholder="Copias"/>
@@ -263,8 +267,11 @@
   if(store.get("transport_printer")) {//transporte printer name selected
     transport_printer_select =  store.get("transport_printer");
   }
-
-  /*if(store.get('tickets_top')){
+  // tickets
+  if(store.get('tickets_width')){
+    document.querySelector('#tickets_width').value = store.get('tickets_width');
+  }
+  if(store.get('tickets_top')){
     document.querySelector('#tickets_margin_top').value = store.get('tickets_top');
   }
   if(store.get('tickets_left')){
@@ -275,12 +282,12 @@
   }
   if(store.get('tickets_bottom')){
     document.querySelector('#tickets_margin_bottom').value = store.get('tickets_bottom');
-  }*/
+  }
   if(store.get('tickets_copy')){
     document.querySelector('#tickets_num_copy').value = store.get('tickets_copy');
   }
   // docs
-  /*if(store.get('docs_top')){
+  if(store.get('docs_top')){
     document.querySelector('#docs_margin_top').value = store.get('docs_top');
   }
   if(store.get('docs_left')){
@@ -291,12 +298,12 @@
   }
   if(store.get('docs_bottom')){
     document.querySelector('#docs_margin_bottom').value = store.get('docs_bottom');
-  }*/
+  }
   if(store.get('docs_copy')){
     document.querySelector('#docs_num_copy').value = store.get('docs_copy');
   }
   // transport
-  /*if(store.get('transport_top')){
+  if(store.get('transport_top')){
     document.querySelector('#transport_margin_top').value = store.get('transport_top');
   }
   if(store.get('transport_left')){
@@ -307,7 +314,7 @@
   }
   if(store.get('transport_bottom')){
     document.querySelector('#transport_margin_bottom').value = store.get('transport_bottom');
-  }*/
+  }
   if(store.get('transport_copy')){
     document.querySelector('#transport_num_copy').value = store.get('transport_copy');
   }
@@ -379,6 +386,9 @@
       let value = item.value;
       let type = item.dataset.txt;
       console.log(value, type)
+      if(value != "" && type == 'width'){
+        store.set(`tickets_${type}`,value);
+      }
       if(value != "" && type == 'top'){
         store.set(`tickets_${type}`,value);
       }

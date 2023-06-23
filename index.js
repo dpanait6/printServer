@@ -1,12 +1,16 @@
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, ipcMain } = require('electron')
 const path = require('path')
 const fs = require('fs')
 var html_to_pdf = require('html-pdf-node');
 const { spawn, exec  } = require("child_process");
 const Store = require("electron-store")
 const store = new Store()
+const { print } = require("pdf-to-printer");
+//const PDFWindow = require('electron-pdf-window')
+const puppeteer = require('puppeteer');
 
 app.disableHardwareAcceleration();
+app.commandLine.appendSwitch("xhttp.htmlHandler: xhttp.convertSync: printer.chromePrinter.Print.--no-sandbox.--disable-dev-shm-usage");
 let install_path = process.env.TEMP;
 devToolsLogJSON(install_path);
 //console.log(process);
@@ -38,6 +42,10 @@ const createWindow = () => {
       //preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
     	contextIsolation: false,
+			//webSecurity: false,
+			allowRunningInsecureContent: true,
+			//plugins: true,
+			//enableRemoteModule: true,
     }
   })
 
@@ -74,10 +82,11 @@ const createWindow = () => {
 // abrimos las url y configuramos la impresion
 const open_url_new_window = (mainWindow, url, print_tik, print_docs, print_transport) => {
 	// TMK5Z  TM4T2 TM6T3
-	//url = "https://yuubbb.com/pre/dani/iluminashop/impresion/ticket_TM4T2?tok=94c48b5d5f59cf93c3c7add6a1b64d30";
-	//url = "https://yuubbb.com/pre/dani/iluminashop/impresion/ticket_TM4T2?tok=94c48b5d5f59cf93c3c7add6a1b64d30"
+	//url = "https://yuubbb.com/pre/dani/iluminashop/impresion/ticket_TM4T2?tok=94c48b5d5f59cf93c3c7add6a1b64d30";//&ml=2&mr=7
+	//url = "https://yuubbb.com/pre/dani/iluminashop/impresion/ticket_TM6T3?tok=94c48b5d5f59cf93c3c7add6a1b64d30"
 	//url = "https://yuubbb.com/pre/dani/iluminashop/impresion/factura1_T1T2Z"
-	mainWindow.loadURL(url);
+	//url = "https://yuubbb.com/pre/dani/ledmeeuropa/impresion/albaran_seur_TMPT3?SEUR=TMPT320230424182552&transport=1"
+	
 	devToolsLogJSON(mainWindow, url);
 	devToolsLogJSON(mainWindow, __dirname);
 
@@ -86,39 +95,30 @@ const open_url_new_window = (mainWindow, url, print_tik, print_docs, print_trans
 	let url_to_print = "";
 	let printer_exe = `${__dirname}${path.sep}SumatraPDF.exe`;
 	let num_copy = 1;
+	let params_url = "";
+	let margin = {};
+	let width = 0;
 
-	let pdf_options = {
-		width:300.01,/*height:2800,*/
-		//preferCSSPageSize: true,
-		//format: 'Custom280x1200'
-		scale: 0.95,
-		margen:{
-			top: 2,
-			right: '5mm',
-			bottom: 2,
-			left: 34
-		}
-	};
 	//print_docs = true;
 	//print_tik = true;
+	//print_transport = true;
 	// si es un ticket
 	if(print_tik){
 		//url = "https://yuubbb.com/pre/dani/iluminashop/impresion/ticket_TMK5Z?tok=94c48b5d5f59cf93c3c7add6a1b64d30";
-		let top = store.get("tickets_top") != undefined || store.get('tickets_top') != 0 ? store.get('tickets_top') : 2;
-		let left = store.get("tickets_left") != undefined || store.get('tickets_left') != 0 ? store.get('tickets_left') : 2;
-		let right = store.get("tickets_right") != undefined || store.get('tickets_right') != 0 ? store.get('tickets_right') : 2;
-		let bottom = store.get("tickets_bottom") != undefined || store.get('tickets_bottom') != 0 ? store.get('tickets_bottom') : 2;
+		width = store.get("tickets_width") != undefined || store.get('tickets_width') != 0 ? store.get('tickets_width') : 280;
+		let top = store.get("tickets_top") != undefined || store.get('tickets_top') != 0 ? store.get('tickets_top') : 0;
+		let left = store.get("tickets_left") != undefined || store.get('tickets_left') != 0 ? store.get('tickets_left') : 0;
+		let right = store.get("tickets_right") != undefined || store.get('tickets_right') != 0 ? store.get('tickets_right') : 0;
+		let bottom = store.get("tickets_bottom") != undefined || store.get('tickets_bottom') != 0 ? store.get('tickets_bottom') : 0;
 		num_copy = store.get("tickets_copy") != undefined || store.get('tickets_copy') != 0 ? store.get('tickets_copy') : 1;
-		let margen = {
-			top: parseInt(top),			
-			right: parseInt(right),			
-			bottom:parseInt(bottom),
-			left: parseInt(left)
+		margin = {
+			top: parseInt(top) + 'mm',			
+			right: parseInt(right) + 'mm',			
+			bottom:parseInt(bottom) + 'mm',
+			left: parseInt(left)+ 'mm'
 		}
-		devToolsLogJSON(mainWindow, margen);
-		//pdf_options.format = "Custom80mmx190mm";
-		pdf_options.preferCSSPageSize = true;
-		pdf_options.margen = margen;//ponemos los margenes de la impresion
+		params_url = `&ml=${left}&mr=${right}&mt=${top}&mb=${bottom}`;
+		devToolsLogJSON(mainWindow, margin);
 		
 		printer_name = store.get('ticket_printer');
 		if(printer_name == undefined || printer_name == 0){
@@ -130,24 +130,22 @@ const open_url_new_window = (mainWindow, url, print_tik, print_docs, print_trans
 	}
 	// si es un documento
 	if(print_docs){
-		pdf_options = {
-			//width:700*,height:700.00*/,
-			preferCSSPageSize: false,
-			scale: 0.96
-		};
+		
 		//url_to_print = "https://yuubbb.com/pre/dani/iluminashop/impresion/factura1_T1T2Z";
+		width = 860;
 		let top = store.get("docs_top") != undefined || store.get('docs_top') != 0 ? store.get('docs_top') : 2;
 		let left = store.get("docs_left") != undefined || store.get('docs_left') != 0 ? store.get('docs_left') : 2;
 		let right = store.get("docs_right") != undefined || store.get('docs_right') != 0 ? store.get('docs_right') : 2;
 		let bottom = store.get("docs_bottom") != undefined || store.get('docs_bottom') != 0 ? store.get('docs_bottom') : 2;
 		num_copy = store.get("docs_copy") != undefined || store.get('docs_copy') != 0 ? store.get('docs_copy') : 1;
-		let margen = {
+		margin = {
 			top: top+'px',
-			left: left+'px',
 			right: right+'px',
-			bottom: bottom+'px'
+			bottom: bottom+'px',
+			left: left+'px'
 		}
-		pdf_options.margen = margen;//ponemos los margenes de la impresion
+		/*pdf_options.margin = margin;//ponemos los margenes de la impresion*/
+		params_url = `&ml=${left}&mr=${right}&mt=${top}&mb=${bottom}`;
 		printer_name = store.get('docs_printer');
 		if(printer_name == undefined || printer_name == 0){
         
@@ -157,24 +155,21 @@ const open_url_new_window = (mainWindow, url, print_tik, print_docs, print_trans
 		}
 	}
 	if(print_transport){
-		pdf_options = {
-			width:700/*,height:700.00*/,
-			preferCSSPageSize: false,
-			scale: 0.96
-		};
+		
+		width = 700;
 		let top = store.get("transport_top") != undefined || store.get('transport_top') != 0 ? store.get('transport_top') : 2;
 		let left = store.get("transport_left") != undefined || store.get('transport_left') != 0 ? store.get('transport_left') : 2;
 		let right = store.get("transport_right") != undefined || store.get('transport_right') != 0 ? store.get('transport_right') : 2;
 		let bottom = store.get("transport_bottom") != undefined || store.get('transport_bottom') != 0 ? store.get('transport_bottom') : 2;
 		num_copy = store.get("transport_copy") != undefined || store.get('transport_copy') != 0 ? store.get('transport_copy') : 1;
-		let margen = {
+		margin = {
 			top: top,
-			left: left,
 			right: right,
-			bottom: bottom
+			bottom: bottom,
+			left: left			
 		}
-		pdf_options.margen = margen;//ponemos los margenes de la impresion
-
+		/*pdf_options.margin = margin;//ponemos los margenes de la impresion*/
+		params_url = `&ml=${left}&mr=${right}&mt=${top}&mb=${bottom}`;
 		printer_name = store.get('transport_printer');
 		if(printer_name == undefined || printer_name == 0){
         
@@ -183,55 +178,86 @@ const open_url_new_window = (mainWindow, url, print_tik, print_docs, print_trans
 			return;
 		}
 	}
+
 	//devToolsLogJSON(mainWindow, "printer_name: " + printer_name)
 	//devToolsLogJSON(mainWindow, "printer_exe: " + printer_exe)
 	let command = `"${printer_exe}" -print-to "${printer_name}" ${path_pdf}  -print-settings ${num_copy}x -silent`;
-	let height = 1200;
+	let heightContainer = 1200;
 	//devToolsLogJSON(mainWindow, `command: ${command}`);
+	//console.log(pdf_options)
+	//params_url = '&ml=2&mr=3&mt=0&mb=0';
+	console.log(url + params_url)
+	
+	mainWindow.loadURL(url /*+ params_url*/);
 	// abrimos la url en una nueva ventana
 	mainWindow.webContents.on("dom-ready", async function(){
 		let printers = await mainWindow.webContents.getPrintersAsync();
     	mainWindow.webContents.send("printers:sys",printers);
-		
+		let ticket_html  = "";
+		let html = "";
 		//devToolsLogJSON(mainWindow, install_path);
-		if(print_docs || print_tik){
-			// altura del contenido a imprimir
-			if(print_tik){
-				height = await mainWindow.webContents.executeJavaScript("document.getElementById('container_ticket').scrollHeight");
-				console.log("height", height)
-				heightpdf = height / (1 + 27 / 100);
-				
-				console.log("heightpdf", heightpdf)
-				pdf_options.height = heightpdf;
-
-			}
-
-			let file = { url: url };// url_to_print
-			html_to_pdf.generatePdf(file, pdf_options).then(pdfBuffer => {
-				//devToolsLogJSON(mainWindow, "PDF Buffer:-" + pdfBuffer);
-				fs.writeFile(path_pdf, pdfBuffer, function (err) {
-					if (err) {
-						console.log(err);
-					} else {
-						devToolsLogJSON(mainWindow, 'PDF Generated Successfully');
-	
-						exec(command, (error, stdout, stderr) => {
-							if (error) {
-								devToolsLogJSON(mainWindow, `error: ${error.message}`);
-								console.log(`error: ${error.message}`);
-								return;
-							}
-							if (stderr) {
-								devToolsLogJSON(mainWindow, `stderr: ${stderr}`);
-								console.log(`stderr: ${stderr}`);
-								return;
-							}
-							devToolsLogJSON(mainWindow, `stdout: ${stdout}`);
-							console.log(`stdout: ${stdout}`);
-						});
-					}
-				});
+		if(print_docs || print_tik || print_transport){
+			const browser = await puppeteer.launch({
+				headless: 'new', 
 			});
+  			const page = await browser.newPage();
+			//await page.setViewport({width: 280, height: 3500});
+			await page.goto(url + params_url);
+			//await page.setContent(html);
+			
+			await page.content();
+			heightContainer = await page.evaluate(() => document.documentElement.offsetHeight);
+			//await page.evaluate(() => document.getElementById('container_ticket').style.width = '360px');
+			console.log(heightContainer);
+			if(print_tik){
+				heightContainer = heightContainer / (1 + 30 / 100);
+			}
+			
+			
+			await page.evaluate(()=> document.getElementsByClassName('buttons')[0].style.display = 'none');
+			/*let buttons = await page.waitForSelector(" div > .buttons");
+			await buttons.style.display = 'none';*/
+			console.log(heightContainer);
+			// Set screen size
+ 			const pdfOptions = {
+				path: path_pdf,
+				width: width + 'px',
+				height: heightContainer+'px',
+				margin: margin,//{ top: '5mm', right: '3mm', bottom: '8mm', left: '0mm' },
+				printBackground: true 
+				///preferCSSPageSize: false
+			} 
+			await page.pdf(pdfOptions);
+			
+			await browser.close();
+			
+
+			const options = {
+				silent: true,
+				printer: printer_name,
+				//scale: "fit",
+				copies: parseInt(num_copy),
+				margin: margin
+			};
+			console.log("printer options", options)
+			print(path_pdf, options).then(response => {
+				//console.log(response);
+			});
+			/*exec(command, (error, stdout, stderr) => {
+				if (error) {
+					devToolsLogJSON(mainWindow, `error: ${error.message}`);
+					console.log(`error: ${error.message}`);
+					return;
+				}
+				if (stderr) {
+					devToolsLogJSON(mainWindow, `stderr: ${stderr}`);
+					console.log(`stderr: ${stderr}`);
+					return;
+				}
+				devToolsLogJSON(mainWindow, `stdout: ${stdout}`);
+				console.log(`stdout: ${stdout}`);
+			});*/
+		
 		}
 	});
 
@@ -256,7 +282,7 @@ app.whenReady().then(() => {
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
 })
-console.log(path.resolve(__dirname,'./logo.ico'))
+//console.log(path.resolve(__dirname,'./logo.ico'))
 
 function devToolsLogJSON(mainWindow, s) {
     console.log(s)
