@@ -184,6 +184,10 @@
     <div class="form-group" id="docs-printers-container"  style="width: 350px;margin: 0 auto;margin-bottom: 20px;"></div>
     <div class="d-flex config_container pb-3">
       <div class="magin_container">
+        <label for="docs_width">Ancho</label>
+        <input type="text" class="input_docs" data-txt="width" id="docs_width" placeholder="Ancho"/>
+      </div>
+      <div class="magin_container">
         <label for="margin_top">Arriba</label>
         <input type="text" class="input_docs" data-txt="top" id="docs_margin_top" placeholder="Arriba"/>
       </div>
@@ -214,6 +218,10 @@
     </div>
     <div class="form-group" id="transport-printers-container"  style="width: 350px;margin: 0 auto;margin-bottom: 20px;"></div>
     <div class="d-flex config_container pb-3">
+      <div class="magin_container">
+        <label for="transport_width">Ancho</label>
+        <input type="text" class="input_transport" data-txt="width" id="transport_width" placeholder="Ancho"/>
+      </div>
       <div class="magin_container">
         <label for="margin_top">Arriba</label>
         <input type="text" class="input_transport" data-txt="top" id="transport_margin_top" placeholder="Arriba"/>
@@ -257,7 +265,7 @@
   let ticket_printer_select = '';
   let docs_printer_select = '';
   let transport_printer_select = '';
-  console.log("dirname", __dirname, install_path);
+  //console.log("dirname", __dirname, install_path);
   if(store.get("ticket_printer")) {//tikets printer name selected
     ticket_printer_select =  store.get("ticket_printer");
   }
@@ -287,6 +295,9 @@
     document.querySelector('#tickets_num_copy').value = store.get('tickets_copy');
   }
   // docs
+  if(store.get('docs_width')){
+    document.querySelector('#docs_width').value = store.get('docs_width');
+  }
   if(store.get('docs_top')){
     document.querySelector('#docs_margin_top').value = store.get('docs_top');
   }
@@ -303,6 +314,9 @@
     document.querySelector('#docs_num_copy').value = store.get('docs_copy');
   }
   // transport
+  if(store.get('transport_width')){
+    document.querySelector('#transport_width').value = store.get('transport_width');
+  }
   if(store.get('transport_top')){
     document.querySelector('#transport_margin_top').value = store.get('transport_top');
   }
@@ -321,7 +335,7 @@
 
 
   ipcRenderer.on("printers:sys",async (error, data) => {
-    console.log(data); 
+    //console.log(data); 
     let select_tickets = '<select class="form-control" name="" id="ticket-printers"><option value="0">Ninguna</option>'
     data.forEach(element => {
         if(ticket_printer_select != "" && ticket_printer_select == element.name) select_tickets +=`<option value="${element.name}" selected>${element.name}</option>`
@@ -368,7 +382,7 @@
   });
   var set_printer = function(type){
     let printer = document.querySelector(`#${type}-printers`).value;
-    console.log("printer",printer);
+    //console.log("printer",printer);
     /*if(printer != 0){
         store.set(`${type}_printer`,printer);
         //console.log(process.env.APPDATA) 
@@ -382,10 +396,10 @@
     //let value = this.value;
     let elements = document.querySelectorAll('.input_tickets');
     elements.forEach((item, idx)=>{
-      console.log(item, idx);
+      //console.log(item, idx);
       let value = item.value;
       let type = item.dataset.txt;
-      console.log(value, type)
+      //console.log(value, type)
       if(value != "" && type == 'width'){
         store.set(`tickets_${type}`,value);
       }
@@ -411,10 +425,13 @@
     //let value = this.value;
     let elements = document.querySelectorAll('.input_docs');
     elements.forEach((item, idx)=>{
-      console.log(item, idx);
+      //console.log(item, idx);
       let value = item.value;
       let type = item.dataset.txt;
-      console.log(value, type)
+      //console.log(value, type)
+      if(value != "" && type == 'width'){
+        store.set(`docs_${type}`,value);
+      }
       if(value != "" && type == 'top'){
         store.set(`docs_${type}`,value);
       }
@@ -438,10 +455,13 @@
     //let value = this.value;
     let elements = document.querySelectorAll('.input_transport');
     elements.forEach((item, idx)=>{
-      console.log(item, idx);
+      //console.log(item, idx);
       let value = item.value;
       let type = item.dataset.txt;
-      console.log(value, type)
+      //console.log(value, type)
+      if(value != "" && type == 'width'){
+        store.set(`transport_${type}`,value);
+      }
       if(value != "" && type == 'top'){
         store.set(`transport_${type}`,value);
       }

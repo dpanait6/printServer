@@ -1,12 +1,12 @@
 {
   "name": "buy-print-server",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Servidor de impresion",
   "main": "index.js",
   "scripts": {
     "test": "electron .",
     "make": "electron-forge make",
-    "build": "node buil_installer.js --icon=logo.ico",
+    "build": "node build_installer.js --icon=logo.ico",
     "pack": "electron-packager . printserver --platform=win32 --arch=x64 --protocol=yubprint --protocol-name='yubprint' --icon=logo.ico "
   },
   "keywords": [],
