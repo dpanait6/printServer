@@ -21,7 +21,7 @@ const msiCreator = new MSICreator({
     exe: 'printserver',
     name: 'Printserver',
     manufacturer: 'Buygest',
-    version: '1.0.1',
+    version: '1.0.4',
     icon: path.resolve(__dirname,`.${path.sep}printserver-win32-x64${path.sep}resources${path.sep}app${path.sep}logo.ico`),
 
     // Configure installer User Interface

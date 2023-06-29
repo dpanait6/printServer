@@ -1,6 +1,6 @@
 {
   "name": "buy-print-server",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Servidor de impresion",
   "main": "index.js",
   "scripts": {
@@ -15,18 +15,20 @@
   "devDependencies": {
     "@electron-forge/cli": "^6.2.1",
     "@electron-forge/maker-wix": "^6.2.1",
-    "electron": "^25.1.1",
-    "electron-builder": "^24.4.0",
+    "electron": "^25.2.0",
+    "electron-builder": "^23.4.0",
     "electron-packager": "^17.1.1",
     "electron-wix-msi": "^5.0.0"
   },
   "dependencies": {
-    "electron-pdf-window": "^1.0.12",
+    "chrome-paths": "^1.0.1",
+    "cosmiconfig": "^8.2.0",
     "electron-store": "^8.1.0",
     "fs": "^0.0.1-security",
     "html-pdf-node": "^1.0.7",
     "pdf-to-printer": "^5.6.0",
-    "puppeteer": "^20.7.3"
+    "puppeteer": "^20.7.3",
+    "puppeteer-core": "^20.7.3"
   },
   "protocols": [
     {

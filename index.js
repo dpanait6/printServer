@@ -6,8 +6,8 @@ const { spawn, exec  } = require("child_process");
 const Store = require("electron-store")
 const store = new Store()
 const { print } = require("pdf-to-printer");
-//const PDFWindow = require('electron-pdf-window')
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
+const chromePaths = require('chrome-paths');
 
 app.disableHardwareAcceleration();
 app.commandLine.appendSwitch("xhttp.htmlHandler: xhttp.convertSync: printer.chromePrinter.Print.--no-sandbox.--disable-dev-shm-usage");
@@ -22,8 +22,8 @@ const PROTOCOL_PREFIX = PROTOCOL.split(':')[0];
 
 if(process.platform == "linux"){
 	devToolsLogJSON(__dirname)
-	console.log(__dirname)
-	console.log(PROTOCOL_PREFIX)
+	//console.log(__dirname)
+	//console.log(PROTOCOL_PREFIX)
 	app.setAsDefaultProtocolClient('yubprint')
 	  
 } else {
@@ -42,20 +42,20 @@ const createWindow = () => {
       //preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
     	contextIsolation: false,
-			//webSecurity: false,
-			allowRunningInsecureContent: true,
-			//plugins: true,
-			//enableRemoteModule: true,
+		nativeWindowOpen: true,
+		sandbox: false,
+		//webSecurity: false,
+		allowRunningInsecureContent: true,
+		//plugins: true,
+		//enableRemoteModule: true,
     }
   })
 
-  // and load the index.html of the app.
-  //mainWindow.loadFile('index.html');
 	let print_tik = false;
-  let print_docs = false;
+	let print_docs = false;
 	let print_transport = false;
 
-  let uri = process.argv[1]
+	let uri = process.argv[1]
 	if(uri != undefined && uri != '.'){
 		url_o = uri.split('t://')[1];
 
@@ -106,21 +106,19 @@ const open_url_new_window = (mainWindow, url, print_tik, print_docs, print_trans
 	//print_transport = true;
 	// si es un ticket
 	if(print_tik){
-		//url = "https://yuubbb.com/pre/dani/iluminashop/impresion/ticket_TMK5Z?tok=94c48b5d5f59cf93c3c7add6a1b64d30";
-		width = store.get("tickets_width") != undefined || store.get('tickets_width') != 0 ? store.get('tickets_width') : 280;
-		let top = store.get("tickets_top") != undefined || store.get('tickets_top') != 0 ? store.get('tickets_top') : 0;
-		let left = store.get("tickets_left") != undefined || store.get('tickets_left') != 0 ? store.get('tickets_left') : 0;
-		let right = store.get("tickets_right") != undefined || store.get('tickets_right') != 0 ? store.get('tickets_right') : 0;
-		let bottom = store.get("tickets_bottom") != undefined || store.get('tickets_bottom') != 0 ? store.get('tickets_bottom') : 0;
-		num_copy = store.get("tickets_copy") != undefined || store.get('tickets_copy') != 0 ? store.get('tickets_copy') : 1;
+		
+		width = store.get("tickets_width") || 280;
+		let top = store.get("tickets_top") || 0;
+		let left = store.get("tickets_left") || 0;
+		let right = store.get("tickets_right") || 0;
+		let bottom = store.get("tickets_bottom") || 0;
+		num_copy = store.get("tickets_copy") || 1;
 		margin = {
 			top: parseInt(top) ,			
 			right: parseInt(right),			
 			bottom: parseInt(bottom),
 			left: parseInt(left)
 		}
-		//params_url = `&ml=${left}&mr=${right}&mt=${top}&mb=${bottom}`;
-		//devToolsLogJSON(mainWindow, margin);
 		
 		printer_name = store.get('ticket_printer');
 		if(printer_name == undefined || printer_name == 0){
@@ -133,21 +131,19 @@ const open_url_new_window = (mainWindow, url, print_tik, print_docs, print_trans
 	// si es un documento
 	if(print_docs){
 		
-		//url_to_print = "https://yuubbb.com/pre/dani/iluminashop/impresion/factura1_T1T2Z";
-		width = store.get("docs_width") != undefined || store.get('docs_width') != 0 ? store.get('docs_width') : 860;
-		let top = store.get("docs_top") != undefined || store.get('docs_top') != 0 ? store.get('docs_top') : 2;
-		let left = store.get("docs_left") != undefined || store.get('docs_left') != 0 ? store.get('docs_left') : 2;
-		let right = store.get("docs_right") != undefined || store.get('docs_right') != 0 ? store.get('docs_right') : 2;
-		let bottom = store.get("docs_bottom") != undefined || store.get('docs_bottom') != 0 ? store.get('docs_bottom') : 2;
-		num_copy = store.get("docs_copy") != undefined || store.get('docs_copy') != 0 ? store.get('docs_copy') : 1;
+		width = store.get("docs_width") || 860;
+		let top = store.get("docs_top") || 2;
+		let left = store.get("docs_left") || 2;
+		let right = store.get("docs_right") || 2;
+		let bottom = store.get("docs_bottom") || 2;
+		num_copy = store.get("docs_copy") || 1;
 		margin = {
 			top: top,
 			right: right,
 			bottom: bottom,
 			left: left
 		}
-		/*pdf_options.margin = margin;//ponemos los margenes de la impresion*/
-		//params_url = `&ml=${left}&mr=${right}&mt=${top}&mb=${bottom}`;
+
 		printer_name = store.get('docs_printer');
 		if(printer_name == undefined || printer_name == 0){
         
@@ -158,20 +154,19 @@ const open_url_new_window = (mainWindow, url, print_tik, print_docs, print_trans
 	}
 	if(print_transport){
 		
-		width = store.get("transport_width") != undefined || store.get('transport_width') != 0 ? store.get('transport_width') : 700;
-		let top = store.get("transport_top") != undefined || store.get('transport_top') != 0 ? store.get('transport_top') : 2;
-		let left = store.get("transport_left") != undefined || store.get('transport_left') != 0 ? store.get('transport_left') : 2;
-		let right = store.get("transport_right") != undefined || store.get('transport_right') != 0 ? store.get('transport_right') : 2;
-		let bottom = store.get("transport_bottom") != undefined || store.get('transport_bottom') != 0 ? store.get('transport_bottom') : 2;
-		num_copy = store.get("transport_copy") != undefined || store.get('transport_copy') != 0 ? store.get('transport_copy') : 1;
+		width = store.get("transport_width") || 700;
+		let top = store.get("transport_top") || 2;
+		let left = store.get("transport_left") || 2;
+		let right = store.get("transport_right") || 2;
+		let bottom = store.get("transport_bottom") || 2;
+		num_copy = store.get("transport_copy") || 1;
 		margin = {
 			top: top,
 			right: right,
 			bottom: bottom,
 			left: left			
 		}
-		/*pdf_options.margin = margin;//ponemos los margenes de la impresion*/
-		//params_url = `&ml=${left}&mr=${right}&mt=${top}&mb=${bottom}`;
+
 		printer_name = store.get('transport_printer');
 		if(printer_name == undefined || printer_name == 0){
         
@@ -181,37 +176,38 @@ const open_url_new_window = (mainWindow, url, print_tik, print_docs, print_trans
 		}
 	}
 
-	//devToolsLogJSON(mainWindow, "printer_name: " + printer_name)
-	//devToolsLogJSON(mainWindow, "printer_exe: " + printer_exe)
-	let command = `"${printer_exe}" -print-to "${printer_name}" ${path_pdf}  -print-settings ${num_copy}x -silent`;
+	var command = `"${printer_exe}" -print-to "${printer_name}" ${path_pdf}  -print-settings ${num_copy}x -silent`;
 	let heightContainer = 1200;
-	//devToolsLogJSON(mainWindow, `command: ${command}`);
+	devToolsLogJSON(mainWindow, `command: ${command}`);
 	//console.log(pdf_options)
 	//params_url = '&ml=2&mr=3&mt=0&mb=0';
-	//console.log(url + params_url)
 	
-	mainWindow.loadURL(url /*+params_url*/);
+	mainWindow.loadURL(url);
 	// abrimos la url en una nueva ventana
 	mainWindow.webContents.on("dom-ready", async function(){
 		let printers = await mainWindow.webContents.getPrintersAsync();
     	mainWindow.webContents.send("printers:sys",printers);
 		let ticket_html  = "";
 		let html = "";
+		
+		//console.log("goole_path", chromePaths.chrome);
 		//devToolsLogJSON(mainWindow, install_path);
 		if(print_docs || print_tik || print_transport){
+
 			const browser = await puppeteer.launch({
-				headless: 'new', 
-			});
+				executablePath: chromePaths.chrome,//'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+			  });
+			
   			const page = await browser.newPage();
+			
 			//await page.setViewport({width: 280, height: 3500});
-			await page.goto(url /*+ params_url*/);
+			let url_page = await page.goto(url);
+			
 			//await page.setContent(html);
 			
 			//await page.content();
 			heightContainer = await page.evaluate(() => document.documentElement.offsetHeight);
-			//
-			//console.log("heightContainer", heightContainer);
-			//console.log("width", width);
+			
 			if(print_tik){
 				if(heightContainer > 1000){
 					if(width > 280) {
@@ -222,9 +218,6 @@ const open_url_new_window = (mainWindow, url, print_tik, print_docs, print_trans
 					
 				}
 				
-				//await page.evaluate((width, left, right) => document.getElementById('container_ticket').offsetWidth = width + left + right);
-				//let width_cont = await page.evaluate((width, left, right) => document.getElementById('container_ticket').offsetWidth);
-				//console.log("width_cont", width_cont);
 			}
 			if(print_transport){
 				heightContainer = heightContainer / (1 + 14 / 100);
@@ -232,6 +225,7 @@ const open_url_new_window = (mainWindow, url, print_tik, print_docs, print_trans
 			if(print_docs){
 				heightContainer = heightContainer / (1 - 5 / 100);
 			}
+			
 			if(print_docs || print_transport){
 				// albaran transporte
 				let transport_print_button = await page.evaluate(()=> document.getElementById('options_view'));
@@ -245,39 +239,36 @@ const open_url_new_window = (mainWindow, url, print_tik, print_docs, print_trans
 				}
 				
 			}
+			devToolsLogJSON(mainWindow, `width: ${width} - height: ${heightContainer}, margen: ${margin}`);
 			
-			/*let buttons = await page.waitForSelector(" div > .buttons");
-			await buttons.style.display = 'none';*/
-			//console.log(heightContainer);
-			// Set screen size
-			//await page.emulate('screen');
 			// emulamos una pantalla para poder poner magenes
 			await page.emulateMediaType("screen");
-		
+			
  			const pdfOptions = {
 				path: path_pdf,
 				width: width + 'px',
 				height: heightContainer+'px',
-				margin: margin,//{ top: '5mm', right: '3mm', bottom: '8mm', left: '0mm' },
-				/*printBackground: true ,
-				preferCSSPageSize: true*/
+				margin: margin,
+				printBackground: true ,
+				/*preferCSSPageSize: true*/
 			} 
-			await page.pdf(pdfOptions);
-			
+			let pdf_generate = await page.pdf(pdfOptions);
+			//devToolsLogJSON(mainWindow, `pdf generate: ${pdf_generate}`)
 			await browser.close();
 			
 
-			const options = {
+			/*const options = {
 				silent: true,
 				printer: printer_name,
 				//scale: "fit",
 				copies: parseInt(num_copy),
 				margin: margin
 			};
-			//console.log("printer options", options)
-			/*print(path_pdf, options).then(response => {
-				//console.log(response);
+		
+			print(path_pdf, options).then(response => {
+				devToolsLogJSON(mainWindow, `stdout: ${response}`);
 			});*/
+			var command = `"${printer_exe}" -print-to "${printer_name}" ${path_pdf}  -print-settings ${num_copy}x -silent`;
 			exec(command, (error, stdout, stderr) => {
 				if (error) {
 					devToolsLogJSON(mainWindow, `error: ${error.message}`);
@@ -292,7 +283,7 @@ const open_url_new_window = (mainWindow, url, print_tik, print_docs, print_trans
 				devToolsLogJSON(mainWindow, `stdout: ${stdout}`);
 				console.log(`stdout: ${stdout}`);
 			});
-		
+
 		}
 	});
 
